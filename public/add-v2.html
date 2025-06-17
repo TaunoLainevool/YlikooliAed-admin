@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Quiz</title>
+    <link rel="stylesheet" href="css/add-v2.css">
+    <script src="js/add-v2.js"></script>   
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Create Quiz</h1>
+        
+        <div id="alert-container"></div>
+        
+        <form id="quiz-form">
+            <div class="form-group">
+                <label for="quiz-title">Quiz Title *</label>
+                <input type="text" id="quiz-title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="quiz-description">Quiz Description</label>
+                <textarea id="quiz-description" rows="3" placeholder="Optional description..."></textarea>
+            </div>
+            
+            <div class="questions-container">
+                <h3>Questions</h3>
+                <div id="questions-list"></div>
+            </div>
+            
+            <div class="actions">
+                <button type="button" class="btn btn-success" onclick="addQuestion()">➕ Add Question</button>
+                <button type="submit" class="btn btn-primary">💾 Save Quiz</button>
+                <button type="button" class="btn" onclick="window.location.href='/'">↩️ Back to Home</button>
+            </div>
+        </form>
+    </div>

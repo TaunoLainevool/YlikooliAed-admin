@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game High Scores</title>
+    <link rel="stylesheet" href="css/hiscores.css">
+    <script src="js/hiscores.js"></script>    
+</head>
+<body>
+    <body>
+        <div class="container">
+            <a href="/" class="back-btn">← Tagasi algusse</a>
+            <div class="header">
+                <h1>🏆 Edetabel </h1>
+            </div>
+    
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalGames">-</div>
+                    <div class="stat-label">Tulemusi kokku</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="highestScore">-</div>
+                    <div class="stat-label">Kõrgeim skoor</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="averageScore">-</div>
+                    <div class="stat-label">Keskmine skoor</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="uniquePlayers">-</div>
+                    <div class="stat-label">Mängijate koguarv</div>
+                </div>
+            </div>
+        
+            <div class="leaderboard">
+                <div id="loadingIndicator" class="loading">
+                    <div class="spinner"></div>
+                    <div>Laadin skoore...</div>
+                </div>
+                <table id="scoresTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Koht</th>
+                            <th>Mängija</th>
+                            <th>Skoor</th>
+                            <th>Kuupäev</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scoresBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+</body>
+</html>

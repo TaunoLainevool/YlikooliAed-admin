@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Kustuta küsimus</title>
+        <link rel="stylesheet" href="css/delete.css">
+        <script src="js/delete.js"></script>    
+    </head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← Tagasi algusse </a>
+        
+        <div class="header">
+            <h1>🗑️ Küsimuste kustutamine</h1>
+            <p class="subtitle">Vali küsimus mida soovid kustutada</p>
+        </div>
+        
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+        
+        <div id="quizContainer" class="loading">Laen küsimusi...</div>
+    </div>
+
+    <div id="confirmDialog" class="confirm-dialog">
+        <div class="confirm-content">
+            <h3>Kinnita kustutamines</h3>
+            <p id="confirmText">Oled kindel, et soovid seda kustutada?</p>
+            <div class="confirm-buttons">
+                <button id="confirmYes" class="confirm-btn confirm-yes">Jah</button>
+                <button id="confirmNo" class="confirm-btn confirm-no">Ei</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+    

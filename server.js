@@ -1,0 +1,272 @@
+// server.js
+const express = require('express');
+const bcrypt = require('bcrypt');
+const session = require('express-session');
+const { Pool } = require('pg');
+const path = require('path');
+
+const app = express();
+const PORT = 3000;
+
+// PostgreSQL connection
+const pool = new Pool({
+    user: 'taunola',              
+    host: 'greeny.cs.tlu.ee',
+    database: 'aed',      
+    password: 'PASSWORD',   //init ajal  
+    port: 5432,
+});
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+app.use(session({
+    secret: 'your-secret-key-change-this-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } 
+}));
+
+
+const initDB = async () => {
+    try {
+        await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        admin BOOLEAN NOT NULL DEFAULT FALSE 
+      )
+    `);
+        console.log('Database initialized');
+    } catch (err) {
+        console.error('Database initialization error:', err);
+    }
+};
+
+// Routes
+app.get('/', (req, res) => {
+    if (req.session.userId) {
+        res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+    } else {
+        res.sendFile(path.join(__dirname, 'public', 'login.html'));
+    } 
+});
+
+app.get('/register', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
+// Register endpoint
+app.post('/api/register', async (req, res) => {
+    const { username, email, password } = req.body;
+
+    try {
+        
+        const userExists = await pool.query(
+            'SELECT * FROM users WHERE username = $1 OR email = $2',
+            [username, email]
+        );
+
+        if (userExists.rows.length > 0) {
+            return res.status(400).json({ error: 'User already exists' });
+        }
+
+        
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+
+        
+        const result = await pool.query(
+            'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email',
+            [username, email, passwordHash]
+        );
+
+        req.session.userId = result.rows[0].id;
+        req.session.username = result.rows[0].username;
+
+        res.json({ success: true, user: result.rows[0] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Login endpoint
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        
+        const result = await pool.query(
+            'SELECT * FROM users WHERE username = $1 OR email = $1 and admin = TRUE',
+            [username]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(400).json({ error: 'Vigane e-posti aadress või salasõna' });
+        }
+
+        const user = result.rows[0];
+
+        
+        const validPassword = await bcrypt.compare(password, user.password_hash);
+
+        if (!validPassword) {
+            return res.status(400).json({ error: 'Vigane e-posti aadress või salasõna' });
+        }
+
+        
+        req.session.userId = user.id;
+        req.session.username = user.username;
+
+        res.json({ success: true, user: { id: user.id, username: user.username, email: user.email } });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Logout endpoint
+app.post('/api/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Tehniline viga!' });
+        }
+        res.json({ success: true });
+    });
+});
+
+// Protected route example
+app.get('/api/profile', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    res.json({
+        userId: req.session.userId,
+        username: req.session.username
+    });
+});
+
+app.get('/', (req, res) => {
+   
+  });
+  
+  app.get('/add', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'add.html'));
+  });
+  
+  app.get('/delete', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'delete.html'));
+  });
+  
+  app.get('/hiscores', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'hiscores.html'));
+  });
+
+  
+  app.get('/api/scores', async (req, res) => {
+    try {
+      const { limit = 10, game_mode = 'classic' } = req.query;
+      
+      const result = await pool.query(
+        `SELECT id, player_name, score, game_mode, created_at 
+         FROM scores 
+         WHERE 1=1
+         ORDER BY score DESC, created_at ASC `
+      );
+      
+      res.json({
+        success: true,
+        scores: result.rows
+      });
+
+    } catch (err) {
+      console.error('Error fetching scores:', err);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to fetch scores' 
+      });
+    }
+  });
+
+
+  app.get('/api/stats', async (req, res) => {
+    try {      
+      const result = await pool.query(
+        `SELECT 
+           COUNT(*) as total_games,
+           MAX(score) as highest_score,
+           AVG(score)::INTEGER as average_score,
+           COUNT(DISTINCT player_name) as unique_players
+         FROM scores`,
+        );
+      
+        res.json({
+          success: true,
+          scores: result.rows
+        });
+  
+      } catch (err) {
+        console.error('Error fetching scores:', err);
+        res.status(500).json({ 
+          success: false, 
+          error: 'Failed to fetch scores' 
+        });
+      }
+    }); 
+
+  app.get('/api/quizzes', async (req, res) => {
+    try {
+      const result = await pool.query('SELECT * FROM quizzes ORDER BY created_at DESC');
+      res.json(result.rows);
+
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Failed to fetch quizzes' });
+    } 
+  });
+  
+
+
+  app.post('/api/quizzes', async (req, res) => {
+    const { title, question, option_a, option_b, option_c, option_d, correct_answer } = req.body;
+    
+    try {
+      const result = await pool.query(
+        'INSERT INTO quizzes (title, question, option_a, option_b, option_c, option_d, correct_answer) VALUES (trim($1), $2, $3, $4, $5, $6, $7) RETURNING *',
+        [title, question, option_a, option_b, option_c, option_d, correct_answer.toUpperCase()]
+      );
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Küsimuse lisamine' });
+    }
+  });
+  
+  app.delete('/api/quizzes/:id', async (req, res) => {
+    const { id } = req.params;
+    
+    try {
+      const result = await pool.query('DELETE FROM quizzes WHERE id = $1 RETURNING *', [id]);
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Küsimust ei leitud!' });
+      }
+      res.json({ message: 'Küsimus kustutatud edukalt!', quiz: result.rows[0] });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Küsimuse kustutamine ebaõnnestus!' });
+    }
+  });
+
+
+// Start server
+initDB().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+});
