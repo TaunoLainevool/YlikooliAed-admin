@@ -10,10 +10,10 @@ const PORT = 3000;
 
 //init ajal lisa enda baasi andmed
 const pool = new Pool({
-    user: 'postgres',
-    host: '127.0.0.1',
-    database: 'aed',      
-    password: 'PASSWORD',
+    user: 'YOURUSER',
+    host: 'YOURHOST',
+    database: 'YOURBASE',      
+    password: 'YOURPASSWORD',
     port: 5432,
 });
 

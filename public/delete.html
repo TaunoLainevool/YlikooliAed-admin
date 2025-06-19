@@ -16,8 +16,17 @@
             <p class="subtitle">Vali küsimus mida soovid kustutada</p>
         </div>
         
+        <a href="/add" class="nav-btn add">➕ Lisa uus küsimus</a>
+        
         <div id="successMessage" class="success-message"></div>
         <div id="errorMessage" class="error-message"></div>
+                        
+        <div class="filter-container">
+            <label class="filter-text">🔍 Otsi küsimusi:</label>
+            <input type="text"  class="filter-box" id="filterBox" placeholder="Otsi pealkirjast või küsimusest...">
+        </div>
+        
+        <div id="filterStats" class="filter-stats"></div>
         
         <div id="questionContainer" class="loading">Laen küsimusi...</div>
     </div>

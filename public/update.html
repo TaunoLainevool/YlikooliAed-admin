@@ -8,13 +8,27 @@
     <script src="js/update.js" defer></script>
 </head>
 <body>
-<div class="container">
+ <div class="container">
     <a href="/" class="back-btn">← Tagasi algusse </a>
     <header>
         <h1>✏️ Küsimuste uuendamine️️️</h1>
+        <p class="subtitle">Küsimuste uuendamine</p>
     </header>
 
     <a href="/add" class="nav-btn add">➕ Lisa uus küsimus</a>
+
+    <div class="filter-container">
+        <div class="filter-content">
+            <div class="filter-group">
+                <label for="searchText">🔍 Otsi küsimusi:</label>
+                <input type="text" id="searchText" placeholder="Otsi pealkirjast või küsimusest...">
+            </div>
+        </div>
+    </div>
+
+    <div id="searchResultsInfo" class="results-info" style="display: none;">
+        Leitud <span id="searchResultCount">0</span> küsimust
+    </div>
 
     <div id="questionForm" class="form-container">
         <form id="questionFormElement">
@@ -76,6 +90,12 @@
     </div>
 
     <div id="questionsList" class="questions-list"></div>
+    
+    <div id="noSearchResults" class="no-results" style="display: none;">
+        <p>🔍 Otsingu järgi küsimusi ei leitud</p>
+        <p>Proovi muuta otsingusõna</p>
+    </div>
+</div>
 </div>
 </body>
 </html>

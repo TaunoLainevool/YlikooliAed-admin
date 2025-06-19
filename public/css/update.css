@@ -22,8 +22,8 @@ body {
     box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     width: 90%;
     margin: 0 auto;
+    position: relative;
 }
-
 
 header {
     background:white;
@@ -31,6 +31,12 @@ header {
     margin-bottom: 2rem;
     border-radius: 10px;
     text-align: center;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
 }
 
 .btn {
@@ -201,6 +207,11 @@ textarea {
     .container {
         padding: 10px;
     }
+
+    .nav-btn.add {
+        position: static;
+        margin-bottom: 1rem;
+    }
 }
 
 .back-btn {
@@ -217,7 +228,6 @@ textarea {
 .back-btn:hover {
     background: #5a6268;
 }
-
 
 .nav-buttons {
     display: flex;
@@ -245,4 +255,8 @@ textarea {
 
 .nav-btn.add {
     background: linear-gradient(45deg, #4CAF50, #45a049);
+    position: absolute; 
+    top: 2rem; 
+    right: 2rem; 
+    z-index: 10; 
 }

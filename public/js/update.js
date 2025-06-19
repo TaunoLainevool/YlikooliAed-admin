@@ -1,6 +1,19 @@
 let currentEditId = null;
+let allQuestions = [];
+let searchResults = [];
 
-document.addEventListener('DOMContentLoaded', loadQuestions);
+document.addEventListener('DOMContentLoaded', function() {
+    loadQuestions();
+    
+    const searchInput = document.getElementById('searchText');
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(performSearch, 300);
+        });
+    }
+});
 
 document.getElementById('questionFormElement').addEventListener('submit', handleFormSubmit);
 
@@ -11,6 +24,9 @@ async function loadQuestions() {
     try {
         const response = await fetch('/api/quizzes');
         const questions = await response.json();
+
+        allQuestions = questions;
+        searchResults = [...allQuestions];
 
         document.getElementById('loadingSpinner').style.display = 'none';
         displayQuestions(questions);
@@ -44,6 +60,52 @@ function displayQuestions(questions) {
                     </div>
                 </div>
             `).join('');
+}
+
+function performSearch() {
+    const searchText = document.getElementById('searchText').value.toLowerCase().trim();
+    
+    if (!searchText) {
+
+        searchResults = [...allQuestions];
+        hideSearchInfo();
+        displayQuestions(searchResults);
+    } else {
+
+        searchResults = allQuestions.filter(question => {
+            const titleMatch = question.title.toLowerCase().includes(searchText);
+            const questionMatch = question.question.toLowerCase().includes(searchText);
+            const optionAMatch = question.option_a.toLowerCase().includes(searchText);
+            const optionBMatch = question.option_b.toLowerCase().includes(searchText);
+            const optionCMatch = question.option_c.toLowerCase().includes(searchText);
+            const optionDMatch = question.option_d.toLowerCase().includes(searchText);
+            
+            return titleMatch || questionMatch || optionAMatch || optionBMatch || optionCMatch || optionDMatch;
+        });
+        
+        updateSearchResultsDisplay();
+        displayQuestions(searchResults);
+    }
+}
+
+function updateSearchResultsDisplay() {
+    const searchResultsInfo = document.getElementById('searchResultsInfo');
+    const searchResultCount = document.getElementById('searchResultCount');
+    const noSearchResults = document.getElementById('noSearchResults');
+    
+    if (searchResults.length > 0) {
+        searchResultCount.textContent = searchResults.length;
+        searchResultsInfo.style.display = 'block';
+        noSearchResults.style.display = 'none';
+    } else {
+        searchResultsInfo.style.display = 'none';
+        noSearchResults.style.display = 'block';
+    }
+}
+
+function hideSearchInfo() {
+    document.getElementById('searchResultsInfo').style.display = 'none';
+    document.getElementById('noSearchResults').style.display = 'none';
 }
 
 async function editQuestion(id) {
