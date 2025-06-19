@@ -8,12 +8,12 @@ async function loadQuizzes() {
         displayQuizzes();
     } catch (error) {
         console.error('Error loading quizzes:', error);
-        document.getElementById('quizContainer').innerHTML = '<div class="error-message" style="display: block;">Viga küsimuste laadimisel</div>';
+        document.getElementById('questionContainer').innerHTML = '<div class="error-message" style="display: block;">Viga küsimuste laadimisel</div>';
     }
 }
 
 function displayQuizzes() {
-    const container = document.getElementById('quizContainer');
+    const container = document.getElementById('questionContainer');
     
     if (quizzes.length === 0) {
         container.innerHTML = `
@@ -27,20 +27,20 @@ function displayQuizzes() {
     }
     
     container.innerHTML = `
-        <div class="quiz-grid">
+        <div class="question-grid">
             ${quizzes.map(quiz => `
-                <div class="quiz-card">
-                    <div class="quiz-meta">
-                        <div class="quiz-date">
+                <div class="question-card">
+                    <div class="question-meta">
+                        <div class="question-date">
                             Created: ${new Date(quiz.created_at).toLocaleDateString()}
                         </div>
                         <button class="delete-btn" onclick="confirmDelete(${quiz.id}, '${quiz.title.replace(/'/g, "\\'")}')">
-                            Delete
+                            Kustuta
                         </button>
                     </div>
-                    <div class="quiz-title">${quiz.title}</div>
-                    <div class="quiz-question">${quiz.question}</div>
-                    <div class="quiz-options">
+                    <div class="question-title">${quiz.title}</div>
+                    <div class="question">${quiz.question}</div>
+                    <div class="question-options">
                         <div class="option ${quiz.correct_answer === 'A' ? 'correct' : ''}">A: ${quiz.option_a}</div>
                         <div class="option ${quiz.correct_answer === 'B' ? 'correct' : ''}">B: ${quiz.option_b}</div>
                         <div class="option ${quiz.correct_answer === 'C' ? 'correct' : ''}">C: ${quiz.option_c}</div>

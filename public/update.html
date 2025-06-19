@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uuenda küsimus</title>
+    <link rel="stylesheet" href="css/update.css">
+    <script src="js/update.js" defer></script>
+</head>
+<body>
+<div class="container">
+    <a href="/" class="back-btn">← Tagasi algusse </a>
+    <header>
+        <h1>✏️ Küsimuste uuendamine️️️</h1>
+    </header>
+
+    <a href="/add" class="nav-btn add">➕ Lisa uus küsimus</a>
+
+    <div id="questionForm" class="form-container">
+        <form id="questionFormElement">
+            <input type="hidden" id="questionId">
+
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title" required>
+            </div>
+
+            <div class="form-group">
+                <label for="question">Question:</label>
+                <textarea id="question" required></textarea>
+            </div>
+
+            <div class="options-grid">
+                <div class="form-group">
+                    <label for="option_a">Option A:</label>
+                    <input type="text" id="option_a" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="option_b">Option B:</label>
+                    <input type="text" id="option_b" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="option_c">Option C:</label>
+                    <input type="text" id="option_c" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="option_d">Option D:</label>
+                    <input type="text" id="option_d" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="correct_answer">Correct Answer:</label>
+                <select id="correct_answer" required>
+                    <option value="">Select correct answer</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn" id="submitBtn">Salvesta muudatus</button>
+                <button type="button" class="btn btn-danger" onclick="hideForm()">Tühista</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>Loading questions...</p>
+    </div>
+
+    <div id="questionsList" class="questions-list"></div>
+</div>
+</body>
+</html>

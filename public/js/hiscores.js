@@ -17,11 +17,11 @@ async function loadScores() {
         if (data.success) {
             displayScores(data.scores);
         } else {
-            throw new Error(data.error || 'Failed to load scores');
+            throw new Error(data.error || 'Viga andmete laadimisel');
         }
     } catch (error) {
-        console.error('Error loading scores:', error);
-        showMessage('Error loading scores. Please try again.', 'error');
+        console.error('Viga andmete laadimisel:', error);
+        showMessage('Viga andmete laadimisel.  Proovi hiljem uuesti.', 'error');
     } finally {
         loadingIndicator.style.display = 'none';
         scoresTable.style.display = 'table';
@@ -50,7 +50,7 @@ function displayScores(scores) {
     tbody.innerHTML = '';
     
     if (scores.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666; padding: 40px;">No scores available for this game mode.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666; padding: 40px;">Andmed puuduvad.</td></tr>';
         return;
     }
     
@@ -90,4 +90,4 @@ function escapeHtml(text) {
 setInterval(function() {
     loadScores();
     loadStats();
-}, 30000);
+}, 300000);
