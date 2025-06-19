@@ -10,7 +10,9 @@ Rakenduse käivituseks on vaja postgres andmebaasi ja nodejs.
 
 Kontrolli node olemasolu:<br>
 1)node --version <br>
-2)npm --version
+2)npm --version <br>
+
+Kui ei leia siis tuleb installida nodejs, mis on kättesaadaval siin: https://nodejs.org/en
 
 Installi sõltuvused logimiseks:<br>
 1)npm install express bcrypt express-session pg <br>
