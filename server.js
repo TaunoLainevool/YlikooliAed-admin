@@ -10,10 +10,10 @@ const PORT = 3000;
 
 //init ajal lisa enda baasi andmed
 const pool = new Pool({
-    user: 'YOURUSER',
-    host: 'YOURHOST',
-    database: 'YOURBASE',      
-    password: 'YOURPASSWORD',
+    user: 'postgres',
+    host: 'localhost',
+    database: 'aed',
+    password: 'psql',
     port: 5432,
 });
 
@@ -25,9 +25,24 @@ app.use(session({
     secret: 'your-secret-key-change-this-in-production',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false } 
+    cookie: { secure: false }
 }));
 
+// Authentication middleware
+const requireAuth = (req, res, next) => {
+    if (!req.session.userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+    next();
+};
+
+// Authentication middleware for pages (redirects to login)
+const requireAuthPage = (req, res, next) => {
+    if (!req.session.userId) {
+        return res.redirect('/');
+    }
+    next();
+};
 
 const initDB = async () => {
     try {
@@ -47,13 +62,13 @@ const initDB = async () => {
     }
 };
 
-// Routes
+// Public routes (no authentication required)
 app.get('/', (req, res) => {
     if (req.session.userId) {
         res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
     } else {
         res.sendFile(path.join(__dirname, 'public', 'login.html'));
-    } 
+    }
 });
 
 app.get('/register', (req, res) => {
@@ -64,7 +79,7 @@ app.post('/api/register', async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
-        
+        // Check if user already exists
         const userExists = await pool.query(
             'SELECT * FROM users WHERE username = $1 OR email = $2',
             [username, email]
@@ -74,19 +89,17 @@ app.post('/api/register', async (req, res) => {
             return res.status(400).json({ error: 'Vali uus kasutaja' });
         }
 
-        
+        // Hash password
         const saltRounds = 10;
         const passwordHash = await bcrypt.hash(password, saltRounds);
 
-        
+        // Insert new user into database
         const result = await pool.query(
             'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email',
             [username, email, passwordHash]
         );
 
-        req.session.userId = result.rows[0].id;
-        req.session.username = result.rows[0].username;
-
+        // DO NOT set session variables here - just return success
         res.json({ success: true, user: result.rows[0] });
     } catch (err) {
         console.error(err);
@@ -98,7 +111,6 @@ app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
     try {
-        
         const result = await pool.query(
             'SELECT * FROM users WHERE (username = $1 OR email = $1) and admin = TRUE',
             [username]
@@ -109,14 +121,12 @@ app.post('/api/login', async (req, res) => {
 
         const user = result.rows[0];
 
-
         const validPassword = await bcrypt.compare(password, user.password_hash);
 
         if (!validPassword) {
             return res.status(400).json({ error: 'Vigane e-posti aadress või salasõna' });
         }
 
-        
         req.session.userId = user.id;
         req.session.username = user.username;
 
@@ -127,7 +137,8 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-app.post('/api/logout', (req, res) => {
+// Protected routes - require authentication
+app.post('/api/logout', requireAuth, (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             return res.status(500).json({ error: 'Tehniline viga!' });
@@ -136,43 +147,38 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
-app.get('/api/profile', (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ error: 'Not authenticated' });
-    }
-
+app.get('/api/profile', requireAuth, (req, res) => {
     res.json({
         userId: req.session.userId,
         username: req.session.username
     });
 });
 
-app.get('/', (req, res) => {
-});
-
-app.get('/add', (req, res) => {
+// Protected page routes
+app.get('/add', requireAuthPage, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'add.html'));
 });
 
-app.get('/update', (req, res) => {
+app.get('/update', requireAuthPage, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'update.html'));
 });
-app.get('/delete', (req, res) => {
+
+app.get('/delete', requireAuthPage, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'delete.html'));
 });
 
-app.get('/hiscores', (req, res) => {
+app.get('/hiscores', requireAuthPage, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'hiscores.html'));
 });
 
-app.get('/api/scores', async (req, res) => {
+// Protected API routes
+app.get('/api/scores', requireAuth, async (req, res) => {
     try {
-
         const result = await pool.query(
-            `SELECT id, player_name, score, created_at 
-         FROM scores 
-         WHERE 1=1
-         ORDER BY score DESC, created_at ASC `
+            `SELECT id, player_name, score, created_at
+             FROM scores
+             WHERE 1=1
+             ORDER BY score DESC, created_at ASC `
         );
 
         res.json({
@@ -189,15 +195,15 @@ app.get('/api/scores', async (req, res) => {
     }
 });
 
-app.get('/api/stats', async (req, res) => {
+app.get('/api/stats', requireAuth, async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT 
-           COUNT(*) as total_games,
-           MAX(score) as highest_score,
-           AVG(score)::INTEGER as average_score,
-           COUNT(DISTINCT player_name) as unique_players
-         FROM scores`,
+            `SELECT
+                 COUNT(*) as total_games,
+                 MAX(score) as highest_score,
+                 AVG(score)::INTEGER as average_score,
+                 COUNT(DISTINCT player_name) as unique_players
+             FROM scores`,
         );
 
         res.json({
@@ -214,7 +220,7 @@ app.get('/api/stats', async (req, res) => {
     }
 });
 
-app.get('/api/quizzes', async (req, res) => {
+app.get('/api/quizzes', requireAuth, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM quizzes ORDER BY created_at DESC');
         res.json(result.rows);
@@ -225,7 +231,7 @@ app.get('/api/quizzes', async (req, res) => {
     }
 });
 
-app.post('/api/quizzes', async (req, res) => {
+app.post('/api/quizzes', requireAuth, async (req, res) => {
     const { title, question, option_a, option_b, option_c, option_d, correct_answer } = req.body;
 
     try {
@@ -240,7 +246,7 @@ app.post('/api/quizzes', async (req, res) => {
     }
 });
 
-app.delete('/api/quizzes/:id', async (req, res) => {
+app.delete('/api/quizzes/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -255,7 +261,7 @@ app.delete('/api/quizzes/:id', async (req, res) => {
     }
 });
 
-app.get('/api/quizzes/:id', async (req, res) => {
+app.get('/api/quizzes/:id', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
         const result = await pool.query('SELECT * FROM quizzes WHERE id = $1', [id]);
@@ -271,15 +277,15 @@ app.get('/api/quizzes/:id', async (req, res) => {
     }
 });
 
-app.put('/api/quizzes/:id', async (req, res) => {
+app.put('/api/quizzes/:id', requireAuth, async (req, res) => {
     try {
         const { id } = req.params;
         const { title, question, option_a, option_b, option_c, option_d, correct_answer } = req.body;
 
         const result = await pool.query(
-            `UPDATE quizzes 
-       SET title = $1, question = $2, option_a = $3, option_b = $4, option_c = $5, option_d = $6, correct_answer = $7
-       WHERE id = $8 RETURNING *`,
+            `UPDATE quizzes
+             SET title = $1, question = $2, option_a = $3, option_b = $4, option_c = $5, option_d = $6, correct_answer = $7
+             WHERE id = $8 RETURNING *`,
             [title, question, option_a, option_b, option_c, option_d, correct_answer, id]
         );
 
