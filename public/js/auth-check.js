@@ -1,12 +1,8 @@
-// auth-check.js - Add this file to your public/js/ folder
-// Include this script on protected pages to ensure authentication
-
 async function checkAuthentication() {
     try {
         const response = await fetch('/api/profile');
 
         if (!response.ok) {
-            // User is not authenticated, redirect to login
             window.location.href = '/';
             return false;
         }
@@ -22,7 +18,6 @@ async function checkAuthentication() {
     }
 }
 
-// Function to make authenticated API calls
 async function authenticatedFetch(url, options = {}) {
     try {
         const response = await fetch(url, {
@@ -48,7 +43,6 @@ async function authenticatedFetch(url, options = {}) {
     }
 }
 
-// Add logout functionality
 function logout() {
     fetch('/api/logout', { method: 'POST' })
         .then(response => response.json())
@@ -64,7 +58,6 @@ function logout() {
         });
 }
 
-// Check authentication when page loads
 document.addEventListener('DOMContentLoaded', () => {
     // Only check authentication if we're not on login or register pages
     const currentPath = window.location.pathname;

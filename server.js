@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
@@ -17,7 +16,6 @@ const pool = new Pool({
     port: 5432,
 });
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -28,7 +26,6 @@ app.use(session({
     cookie: { secure: false }
 }));
 
-// Authentication middleware
 const requireAuth = (req, res, next) => {
     if (!req.session.userId) {
         return res.status(401).json({ error: 'Authentication required' });
@@ -36,7 +33,6 @@ const requireAuth = (req, res, next) => {
     next();
 };
 
-// Authentication middleware for pages (redirects to login)
 const requireAuthPage = (req, res, next) => {
     if (!req.session.userId) {
         return res.redirect('/');
@@ -62,7 +58,7 @@ const initDB = async () => {
     }
 };
 
-// Public routes (no authentication required)
+
 app.get('/', (req, res) => {
     if (req.session.userId) {
         res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
@@ -137,7 +133,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Protected routes - require authentication
 app.post('/api/logout', requireAuth, (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -154,7 +149,6 @@ app.get('/api/profile', requireAuth, (req, res) => {
     });
 });
 
-// Protected page routes
 app.get('/add', requireAuthPage, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'add.html'));
 });
