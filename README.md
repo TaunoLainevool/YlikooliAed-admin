@@ -13,7 +13,7 @@ Kontrolli node olemasolu:<br>
 2)npm --version
 
 Installi sõltuvused logimiseks:<br>
-1)npm install express bcrypt express-session pg <br>s
+1)npm install express bcrypt express-session pg <br>
 2)npm install --save-dev nodemon
 
 Lisa server.js enda postgre andmebaasi andmed.
