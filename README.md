@@ -8,12 +8,12 @@ Antud liideses on võimalik lisada, muuta, kustutada küsimusi ja vaadata mängi
 Rakenduse käivitamine lokaalselt:
 Rakenduse käivituseks on vaja postgres andmebaasi ja nodejs.
 
-Kontrolli node olemasolu:
-1)node --version
+Kontrolli node olemasolu:<br>
+1)node --version <br>
 2)npm --version
 
-Installi sõltuvused logimiseks:
-1)npm install express bcrypt express-session pg
+Installi sõltuvused logimiseks:<br>
+1)npm install express bcrypt express-session pg <br>s
 2)npm install --save-dev nodemon
 
 Lisa server.js enda postgre andmebaasi andmed.
